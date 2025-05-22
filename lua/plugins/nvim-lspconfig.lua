@@ -1,4 +1,4 @@
--- LSP Support
+-- LSP Support (Updated for Neovim 0.12)
 return {
   -- LSP Configuration
   -- https://github.com/neovim/nvim-lspconfig
@@ -20,6 +20,33 @@ return {
     { 'folke/neodev.nvim', opts = {} },
   },
   config = function ()
+    -- Configure diagnostics display (Updated for 0.12)
+    vim.diagnostic.config({
+      virtual_text = {
+        enabled = true,
+        source = "if_many",
+        prefix = "●", -- Could be '■', '▎', 'x', '●'
+      },
+      signs = {
+        text = {
+          [vim.diagnostic.severity.ERROR] = "✘",
+          [vim.diagnostic.severity.WARN] = "▲",
+          [vim.diagnostic.severity.HINT] = "⚑",
+          [vim.diagnostic.severity.INFO] = "»",
+        },
+      },
+      underline = true,
+      update_in_insert = false,
+      severity_sort = true,
+      float = {
+        border = "rounded",
+        source = "always",
+        header = "",
+        prefix = "",
+        focusable = false,
+      },
+    })
+
     require('mason').setup()
     require('mason-lspconfig').setup({
       -- Install these LSPs automatically
@@ -34,32 +61,34 @@ return {
         'quick_lint_js',
         -- 'tsserver', -- requires npm to be installed
         -- 'yamlls', -- requires npm to be installed
+      },
+      handlers = {
+        function(server_name)
+          lspconfig[server_name].setup({
+            on_attach = lsp_attach,
+            capabilities = lsp_capabilities,
+          })
+        end
       }
-    })
-
-    local lspconfig = require('lspconfig')
-    local lsp_capabilities = require('cmp_nvim_lsp').default_capabilities()
-    local lsp_attach = function(client, bufnr)
-      -- Create your keybindings here...
-    end
-
-    -- Call setup on each LSP server
-    require('mason-lspconfig').setup({
-      function(server_name)
-        lspconfig[server_name].setup({
-          on_attach = lsp_attach,
-          capabilities = lsp_capabilities,
-        })
-      end
     })
 
     -- Lua LSP settings
     lspconfig.lua_ls.setup {
+      on_attach = lsp_attach,
+      capabilities = lsp_capabilities,
       settings = {
         Lua = {
           diagnostics = {
             -- Get the language server to recognize the `vim` global
             globals = {'vim'},
+          },
+          workspace = {
+            -- Make the server aware of Neovim runtime files
+            library = vim.api.nvim_get_runtime_file("", true),
+            checkThirdParty = false,
+          },
+          telemetry = {
+            enable = false,
           },
         },
       },
@@ -75,4 +104,3 @@ return {
 
   end
 }
-

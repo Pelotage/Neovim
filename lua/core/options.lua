@@ -29,9 +29,35 @@ opt.termguicolors = true
 opt.background = "dark"
 opt.signcolumn = "yes"
 opt.showmode = false
-vim.diagnostic.config {
-  float = { border = "rounded" }, -- add border to diagnostic popups
-}
+
+-- Diagnostic configuration (Updated for Neovim 0.12)
+vim.diagnostic.config({
+  virtual_text = {
+    enabled = true,
+    source = "if_many",
+    prefix = "●",
+    spacing = 4,
+  },
+  signs = {
+    text = {
+      [vim.diagnostic.severity.ERROR] = "✘",
+      [vim.diagnostic.severity.WARN] = "▲",
+      [vim.diagnostic.severity.HINT] = "⚑",
+      [vim.diagnostic.severity.INFO] = "»",
+    },
+  },
+  underline = true,
+  update_in_insert = false,
+  severity_sort = true,
+  float = {
+    border = "rounded",
+    source = "always",
+    header = "",
+    prefix = "",
+    focusable = false,
+    close_events = { "BufLeave", "CursorMoved", "InsertEnter", "FocusLost" },
+  },
+})
 
 -- Backspace
 opt.backspace = "indent,eol,start"
@@ -53,3 +79,13 @@ opt.mouse = ""
 opt.foldlevel = 20
 opt.foldmethod = "expr"
 opt.foldexpr = "nvim_treesitter#foldexpr()" -- Utilize Treesitter folds
+
+-- Set updatetime for better diagnostic experience
+opt.updatetime = 250
+
+-- Don't pass messages to |ins-completion-menu|
+opt.shortmess:append("c")
+
+-- Always show the signcolumn, otherwise it would shift the text each time
+-- diagnostics appear/become resolved
+opt.signcolumn = "yes"
