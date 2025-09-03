@@ -2,6 +2,7 @@
 return {
   -- https://github.com/nvim-tree/nvim-tree.lua
   'nvim-tree/nvim-tree.lua',
+  version = "*", -- Use latest stable version
   dependencies = {
     -- https://github.com/nvim-tree/nvim-web-devicons
     'nvim-tree/nvim-web-devicons', -- Fancy icon support
@@ -22,4 +23,3 @@ return {
     require("nvim-tree").setup(opts)
   end
 }
-

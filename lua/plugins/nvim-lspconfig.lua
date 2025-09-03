@@ -20,6 +20,17 @@ return {
     { 'folke/neodev.nvim', opts = {} },
   },
   config = function ()
+    -- Require lspconfig at the beginning of the config function
+    local lspconfig = require('lspconfig')
+    
+    -- Define capabilities and attach functions
+    local lsp_capabilities = require('cmp_nvim_lsp').default_capabilities()
+    
+    local lsp_attach = function(client, bufnr)
+      -- LSP attach function - you can add keymaps here if needed
+      -- The keymaps are already defined in your core/keymaps.lua file
+    end
+    
     -- Configure diagnostics display (Updated for 0.12)
     vim.diagnostic.config({
       virtual_text = {
@@ -59,6 +70,7 @@ return {
         'lemminx',
         'marksman',
         'quick_lint_js',
+        'clangd', -- C/C++ LSP server
         -- 'tsserver', -- requires npm to be installed
         -- 'yamlls', -- requires npm to be installed
       },
@@ -91,6 +103,23 @@ return {
             enable = false,
           },
         },
+      },
+    }
+
+    -- C/C++ LSP settings (clangd)
+    lspconfig.clangd.setup {
+      on_attach = lsp_attach,
+      capabilities = lsp_capabilities,
+      cmd = {
+        "clangd",
+        "--background-index",
+        "--clang-tidy",
+        "--completion-style=detailed",
+        "--header-insertion=iwyu",
+        "--suggest-missing-includes",
+      },
+      init_options = {
+        clangdFileStatus = true,
       },
     }
 
