@@ -1,4 +1,4 @@
--- LSP Support (Updated for Neovim 0.12 with Python Support)
+-- LSP Support (Updated for Neovim 0.12 with Python and Java Support)
 return {
   -- LSP Configuration
   -- https://github.com/neovim/nvim-lspconfig
@@ -37,6 +37,17 @@ return {
         client.server_capabilities.documentFormattingProvider = false
         client.server_capabilities.documentRangeFormattingProvider = false
       end
+
+      -- Java-specific configurations
+      if client.name == 'jdtls' then
+        -- Enable code lens refresh for Java
+        if client.server_capabilities.codeLensProvider then
+          vim.api.nvim_create_autocmd({ 'BufEnter', 'CursorHold', 'InsertLeave' }, {
+            buffer = bufnr,
+            callback = vim.lsp.codelens.refresh,
+          })
+        end
+      end
     end
 
     -- Configure diagnostics display (Updated for 0.12)
@@ -74,6 +85,12 @@ return {
         'flake8',  -- Python linter
         'debugpy', -- Python debugger adapter
 
+        -- Java development tools
+        'jdtls',              -- Java Language Server
+        'java-debug-adapter', -- Java debugger adapter
+        'java-test',          -- Java test runner
+        'google-java-format', -- Java code formatter
+
         -- Lua development tools
         'stylua', -- Lua formatter
 
@@ -94,6 +111,7 @@ return {
         -- 'html', -- requires npm to be installed
         'lua_ls',
         'pylsp', -- Python LSP server (python-lsp-server)
+        'jdtls', -- Java Language Server
         -- 'jsonls', -- requires npm to be installed
         'lemminx',
         'marksman',
@@ -104,6 +122,11 @@ return {
       },
       handlers = {
         function(server_name)
+          -- Skip jdtls here - we'll configure it separately below
+          if server_name == 'jdtls' then
+            return
+          end
+
           lspconfig[server_name].setup({
             on_attach = lsp_attach,
             capabilities = lsp_capabilities,
@@ -157,6 +180,8 @@ return {
         }
       },
     }
+
+    -- Java LSP is now handled by nvim-jdtls plugin
 
     -- C/C++ LSP settings (clangd)
     lspconfig.clangd.setup {
