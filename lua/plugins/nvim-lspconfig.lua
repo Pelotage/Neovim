@@ -23,6 +23,10 @@ return {
     -- Require lspconfig at the beginning of the config function
     local lspconfig = require('lspconfig')
 
+    -- IMPORTANT: Completely disable lspconfig's jdtls to prevent conflicts
+    lspconfig.jdtls = nil
+    lspconfig.configs.jdtls = nil
+
     -- Define capabilities and attach functions
     local lsp_capabilities = require('cmp_nvim_lsp').default_capabilities()
 
@@ -122,11 +126,7 @@ return {
       },
       handlers = {
         function(server_name)
-          -- Skip jdtls here - we'll configure it separately below
-          if server_name == 'jdtls' then
-            return
-          end
-
+          -- Default setup for all servers
           lspconfig[server_name].setup({
             on_attach = lsp_attach,
             capabilities = lsp_capabilities,
@@ -180,8 +180,6 @@ return {
         }
       },
     }
-
-    -- Java LSP is now handled by nvim-jdtls plugin
 
     -- C/C++ LSP settings (clangd)
     lspconfig.clangd.setup {
